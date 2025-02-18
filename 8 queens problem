@@ -1,0 +1,53 @@
+# Function to print the chessboard with queens
+def print_board(board):
+    for row in board:
+        print(" ".join(["Q" if x else "." for x in row]))
+    print()
+
+# Function to check if a queen can be placed on board[row][col]
+def is_safe(board, row, col):
+    # Check this column on the upper rows
+    for i in range(row):
+        if board[i][col] == 1:
+            return False
+
+    # Check upper-left diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
+        if board[i][j] == 1:
+            return False
+
+    # Check upper-right diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col+1, 8)):
+        if board[i][j] == 1:
+            return False
+
+    return True
+
+# Function to solve the 8-Queens problem using backtracking
+def solve_queens(board, row):
+    # Base case: If all queens are placed
+    if row == 8:
+        print_board(board)
+        return True
+
+    # Try placing the queen in each column one by one
+    for col in range(8):
+        if is_safe(board, row, col):
+            # Place the queen
+            board[row][col] = 1
+
+            # Recur to place the next queen
+            if solve_queens(board, row + 1):
+                return True
+
+            # If placing queen in current column doesn't lead to a solution, backtrack
+            board[row][col] = 0
+
+    # If the queen can't be placed in any column of this row
+    return False
+
+# Initialize an 8x8 chessboard
+board = [[0 for _ in range(8)] for _ in range(8)]
+
+# Call the function to solve the problem
+solve_queens(board, 0)
