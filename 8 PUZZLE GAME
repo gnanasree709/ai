@@ -1,0 +1,80 @@
+import heapq
+import numpy as np
+
+class Puzzle:
+    def __init__(self, board, empty_tile=(0, 0), moves=0, parent=None):
+        self.board = board
+        self.empty_tile = empty_tile
+        self.moves = moves
+        self.parent = parent
+        self.cost = self.moves + self.heuristic()  # f(n) = g(n) + h(n), where g(n) is moves and h(n) is the heuristic
+
+    def heuristic(self):
+        """Calculate Manhattan distance heuristic"""
+        goal = {(i * 3 + j + 1) % 9: (i, j) for i in range(3) for j in range(3)}
+        return sum(abs(i - goal[val][0]) + abs(j - goal[val][1]) for i, row in enumerate(self.board) for j, val in enumerate(row) if val)
+
+    def get_neighbors(self):
+        """Generate possible moves by sliding tiles"""
+        neighbors = []
+        x, y = self.empty_tile
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Directions: Up, Down, Left, Right
+        
+        for dx, dy in moves:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 3 and 0 <= ny < 3:  # Ensure within bounds
+                new_board = [row[:] for row in self.board]
+                new_board[x][y], new_board[nx][ny] = new_board[nx][ny], new_board[x][y]  # Swap tiles
+                neighbors.append(Puzzle(new_board, (nx, ny), self.moves + 1, self))
+        
+        return neighbors
+
+    def __lt__(self, other):
+        """Comparison operator for heapq"""
+        return self.cost < other.cost
+
+
+def solve_8_puzzle(initial_state):
+    """A* Algorithm to solve the 8-puzzle problem"""
+    empty_tile = next((i, j) for i, row in enumerate(initial_state) for j, val in enumerate(row) if val == 0)
+    start = Puzzle(initial_state, empty_tile)
+    
+    open_list = []
+    heapq.heappush(open_list, start)  # Push the start node into the open list
+    visited = set()  # To keep track of visited states
+    
+    while open_list:
+        current = heapq.heappop(open_list)  # Pop the state with the lowest f(n)
+        
+        if current.heuristic() == 0:  # Goal state reached
+            return reconstruct_path(current)
+        
+        visited.add(tuple(map(tuple, current.board)))  # Add current board to visited set
+        
+        for neighbor in current.get_neighbors():
+            if tuple(map(tuple, neighbor.board)) not in visited:
+                heapq.heappush(open_list, neighbor)  # Push neighbors into the open list
+    
+    return None  # If no solution is found
+
+def reconstruct_path(state):
+    """Trace back the path from goal to initial state"""
+    path = []
+    while state:
+        path.append(state.board)
+        state = state.parent
+    return path[::-1]  # Reverse the path to get from start to goal
+
+# Example of initial state
+initial_state = [[1, 2, 3],
+                 [4, 0, 6],
+                 [7, 5, 8]]
+
+# Solve the 8-puzzle
+solution = solve_8_puzzle(initial_state)
+if solution:
+    for step, board in enumerate(solution):
+        print(f"Step {step}:")
+        print(np.array(board), '\n')
+else:
+    print("No solution found!")
