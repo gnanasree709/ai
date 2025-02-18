@@ -1,0 +1,42 @@
+import random
+
+GRID_SIZE = 5
+ROOM_A = (0, 0, 2, 4)  # Room A: Rows 0-2, Columns 0-4
+ROOM_B = (3, 0, 4, 4)  # Room B: Rows 3-4, Columns 0-4
+
+# Generate grid with random dirty (1) and clean (0) cells
+grid = [[random.choice([0, 1]) for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+# Check if a cell is in a given room
+def is_in_room(x, y, room):
+    return room[0] <= x <= room[2] and room[1] <= y <= room[3]
+
+# Vacuum cleaner class
+class VacuumCleaner:
+    def __init__(self, grid):
+        self.grid = grid
+        self.x = self.y = 0  # Starting at the top-left corner
+    
+    def clean(self):
+        # Clean Room A
+        for x in range(ROOM_A[0], ROOM_A[2] + 1):
+            for y in range(ROOM_A[1], ROOM_A[3] + 1):
+                if self.grid[x][y] == 1:
+                    self.grid[x][y] = 0  # Clean dirty cell
+                print(f"Cleaning ({x}, {y}) in Room A")
+
+        # Clean Room B
+        for x in range(ROOM_B[0], ROOM_B[2] + 1):
+            for y in range(ROOM_B[1], ROOM_B[3] + 1):
+                if self.grid[x][y] == 1:
+                    self.grid[x][y] = 0  # Clean dirty cell
+                print(f"Cleaning ({x}, {y}) in Room B")
+
+# Instantiate and clean the grid
+vacuum = VacuumCleaner(grid)
+vacuum.clean()
+
+# Print cleaned grid
+print("\nFinal Grid (Cleaned):")
+for row in grid:
+    print(" ".join(str(cell) for cell in row))
