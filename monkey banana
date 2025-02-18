@@ -1,0 +1,86 @@
+from collections import deque
+
+ROOM_SIZE = 10
+BANANA_POSITION = 8
+MONKEY1_START = 0
+MONKEY2_START = 1
+
+MOVE_LEFT = -1
+MOVE_RIGHT = 1
+CLIMB = "climb"
+
+class Environment:
+    def __init__(self):
+        self.m1_position = MONKEY1_START
+        self.m2_position = MONKEY2_START
+        self.banana_position = BANANA_POSITION
+
+    def is_beneath_banana(self, monkey_position):
+        return monkey_position == self.banana_position - 1
+
+    def apply_action(self, state, monkey, action):
+        m1_position, m2_position = state
+
+        current_position = m1_position if monkey == 1 else m2_position
+
+        if action == MOVE_LEFT:
+            new_position = max(0, current_position - 1)  
+        elif action == MOVE_RIGHT:
+            new_position = min(ROOM_SIZE - 1, current_position + 1)
+        elif action == CLIMB:
+            if self.is_beneath_banana(current_position):
+                new_position = self.banana_position 
+            else:
+                new_position = current_position 
+        else:
+            new_position = current_position
+
+        if monkey == 1:
+            return (new_position, m2_position)
+        else:
+            return (m1_position, new_position)
+
+    def is_goal_state(self, state):
+        return state[0] == self.banana_position or state[1] == self.banana_position
+
+    def get_state(self):
+        return (self.m1_position, self.m2_position)
+
+class MonkeyBananaProblem:
+    def __init__(self):
+        self.environment = Environment()
+
+    def bfs(self):
+        start_state = self.environment.get_state()
+        queue = deque([(start_state, [])])  
+        visited = set()
+
+        while queue:
+            state, actions = queue.popleft()
+
+            if state in visited:
+                continue
+            visited.add(state)
+            
+            if self.environment.is_goal_state(state):
+                return actions
+
+            for monkey in [1, 2]:  
+                for action in [MOVE_LEFT, MOVE_RIGHT, CLIMB]:
+                    new_state = self.environment.apply_action(state, monkey, action)
+                    if new_state not in visited:
+                        queue.append((new_state, actions + [(monkey, action)]))
+        return None
+
+# Create the problem instance
+problem = MonkeyBananaProblem()
+
+# Solve using BFS
+solution = problem.bfs()
+if solution:
+    print("🍌 Solution found:")
+    for step in solution:
+        action_desc = f"moves {'left' if step[1] == MOVE_LEFT else 'right' if step[1] == MOVE_RIGHT else 'climbs'}"
+        print(f"Monkey {step[0]} {action_desc}")
+else:
+    print("No solution found 😕")
