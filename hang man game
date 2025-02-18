@@ -1,0 +1,70 @@
+import random
+
+class HangmanGame:
+    def __init__(self, word_list):
+        self.word_list = word_list  # List of possible words to guess
+        self.word = random.choice(word_list)  # Randomly select a word
+        self.guessed_letters = []  # List of guessed letters
+        self.max_attempts = 2  # Number of wrong guesses allowed
+        self.attempts_left = self.max_attempts  # Initialize remaining attempts
+        self.display_word = ['_'] * len(self.word)  # Display word as underscores initially
+    
+    def display_state(self):
+        # Show the current state of the word and number of attempts left
+        print("Current Word: " + " ".join(self.display_word))
+        print(f"Guessed Letters: {', '.join(self.guessed_letters)}")
+        print(f"Attempts Left: {self.attempts_left}")
+    
+    def guess(self, letter):
+        # Check if the letter has already been guessed
+        if letter in self.guessed_letters:
+            print(f"You already guessed '{letter}'. Try a different letter.")
+            return False
+
+        # Add the guessed letter to the guessed letters list
+        self.guessed_letters.append(letter)
+
+        if letter in self.word:
+            print(f"Good guess! '{letter}' is in the word.")
+            # Update the display word with correct guesses
+            for i in range(len(self.word)):
+                if self.word[i] == letter:
+                    self.display_word[i] = letter
+            return True
+        else:
+            self.attempts_left -= 1  # Decrease attempts if guess is incorrect
+            print(f"Oops! '{letter}' is not in the word.")
+            return False
+    
+    def is_game_over(self):
+        # Check if the game is over either by winning or running out of attempts
+        if self.attempts_left <= 0:
+            print(f"You lost! The word was '{self.word}'.")
+            return True
+        if '_' not in self.display_word:
+            print(f"Congratulations! You guessed the word: '{self.word}'")
+            return True
+        return False
+    
+    def play(self):
+        # Main game loop
+        print("Welcome to Hangman!")
+        
+        while not self.is_game_over():
+            self.display_state()
+            guess = input("Enter a letter: ").lower()
+            if len(guess) != 1 or not guess.isalpha():
+                print("Please enter a valid single letter.")
+                continue
+            self.guess(guess)
+        
+        print("Game Over!")
+
+# List of words for the game
+word_list = ["hangman", "python", "programming", "artificial", "intelligence", "machine", "learning"]
+
+# Create a game instance
+game = HangmanGame(word_list)
+
+# Start the game
+game.play()
